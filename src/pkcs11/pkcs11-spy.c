@@ -1271,6 +1271,8 @@ C_UnwrapKey(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanism,
 	return retne(rv);
 }
 
+#define CKM_AES_CBC_ENCRYPT_DATA       0x00001105
+
 CK_RV
 C_DeriveKey(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hBaseKey,
 		CK_ATTRIBUTE_PTR pTemplate, CK_ULONG  ulAttributeCount, CK_OBJECT_HANDLE_PTR phKey)
@@ -1280,6 +1282,24 @@ C_DeriveKey(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanism, CK_OBJECT_H
 	enter("C_DeriveKey");
 	spy_dump_ulong_in("hSession", hSession);
 	fprintf(spy_output, "pMechanism->type=%s\n", lookup_enum(MEC_T, pMechanism->mechanism));
+    if(pMechanism->pParameter && pMechanism->mechanism == CKM_AES_CBC_ENCRYPT_DATA) {
+        typedef struct CK_AES_CBC_ENCRYPT_DATA_PARAMS {
+            CK_BYTE iv[16];
+            CK_BYTE_PTR pData;
+            CK_ULONG length;
+        } CK_AES_CBC_ENCRYPT_DATA_PARAMS;
+
+        if(pMechanism->ulParameterLen == sizeof(CK_AES_CBC_ENCRYPT_DATA_PARAMS)) {
+            CK_AES_CBC_ENCRYPT_DATA_PARAMS *param = (CK_AES_CBC_ENCRYPT_DATA_PARAMS *)
+                (pMechanism->pParameter);
+            spy_dump_string_out("pMechanism->pParameter->iv", param->iv, sizeof(param->iv));
+            spy_dump_string_out("pMechanism->pParameter->pData", param->pData, param->length);
+            spy_dump_ulong_out("pMechanism->pParameter->length", param->length);
+        }
+    } else if (pMechanism->pParameter) {
+        spy_dump_string_out("pMechanism->pParameter[*pMechanism->ulParameterLen]",
+                            pMechanism->pParameter, pMechanism->ulParameterLen);
+    }
 	spy_dump_ulong_in("hBaseKey", hBaseKey);
 	spy_attribute_list_in("pTemplate", pTemplate, ulAttributeCount);
 	rv = po->C_DeriveKey(hSession, pMechanism, hBaseKey, pTemplate, ulAttributeCount, phKey);
