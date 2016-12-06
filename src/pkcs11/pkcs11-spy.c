@@ -786,6 +786,10 @@ C_EncryptInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanism, CK_OBJECT
 	enter("C_EncryptInit");
 	spy_dump_ulong_in("hSession", hSession);
 	fprintf(spy_output, "pMechanism->type=%s\n", lookup_enum(MEC_T, pMechanism->mechanism));
+    if(pMechanism->pParameter) {
+        spy_dump_string_out("pMechanism->pParameter[*pMechanism->ulParameterLen]",
+                            pMechanism->pParameter, pMechanism->ulParameterLen);        
+    }
 	spy_dump_ulong_in("hKey", hKey);
 	rv = po->C_EncryptInit(hSession, pMechanism, hKey);
 	return retne(rv);
