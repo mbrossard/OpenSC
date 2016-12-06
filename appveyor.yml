@@ -16,12 +16,6 @@ environment:
     # - VSVER: 12
     # - VSVER: 10
 
-matrix:
-  allow_failures:
-    # not included in AppVeyor right now
-    # - platform: x64
-    #  VSVER: 10
-
 install:
   - ps: if ($env:APPVEYOR_PULL_REQUEST_NUMBER -and $env:APPVEYOR_BUILD_NUMBER -ne ((Invoke-RestMethod `
         https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG/history?recordsNumber=50).builds | `
